@@ -1,0 +1,81 @@
+---
+title: "LDA_Example"
+author: "Jon-Frederick Landrigan"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This script runs through a simple example of linear discriminant analysis in a classification problem. The data that will be used in this example is the Iris data set which contains the measurments for sepal and petal length and width for 3 different species of iris. The data is available for download at: https://www.kaggle.com/uciml/iris. 
+
+First lets load the packages that will be used in this example and read in the data. 
+```{r, message=FALSE}
+library(ggplot2)
+library(stringr)
+library(MASS)
+library(caret)
+
+irisDat <- read.table(file = 'iris.csv', sep = ',', header = TRUE)
+```
+
+Now lets get a look at some of the summary statistics 
+```{r}
+summary(irisDat)
+```
+
+In this summay table we see that there are 6 columns including Id, SepalLength, SepalWidth, PetalLength, PetalWidth and Species. Importantly as shown in the species column there are 50 observations of each of the 3 species types totaling 150 observations. 
+
+We can also use the str() to take a look at the data. The str() funciton is useful for seeing what data types are presnt in the dataset.
+```{r}
+str(irisDat)
+```
+
+Now lets do a little data cleaning. In the summary output we can see that the species names are all preceeded by 'Iris-'. This doesn't have a major effect on things but for neatness lets remove this prefix.
+```{r}
+irisDat$Species <- str_replace(irisDat$Species, "Iris-","")
+```
+
+Next lets remove the Id column as this doesn't really provide much information in this data set. It can also be a minor annoyance when defining the model as we will use the '~ .' notation which means include all predictors other then the outcome. 
+```{r}
+irisDat <- irisDat[ , c(2:6)]
+```
+
+OK now that we have done some basic data cleaning lets make some plots to visualize the data.
+```{r}
+ggplot(irisDat, aes(SepalLengthCm, SepalWidthCm, color = Species)) + geom_point()
+ggplot(irisDat, aes(PetalLengthCm, PetalWidthCm, color = Species)) + geom_point()
+```
+
+From these basic plots it can clearly be seen that there are boundaries between the dimensions of the species petals and sepals. Therefore we will use LDA to see if it can pick up on these boundaires.
+
+Now we will train and test the model using 10 fold cross validation. Model performance will be based on its mean classificaiton accuracy. 
+```{r}
+#create train and test folds
+folds <- createFolds(irisDat$Species, k = 10)
+#results is a vector that will contain the accuracy for each of the validation iterations
+results <- c()
+#Loop through the folds and get the testing accuracy for each fit
+for (fld in folds){
+  #train the model
+  fit <- lda(Species ~ . , data = irisDat[-fld,])
+  #using the lda fit to 
+  preds <- predict(fit, irisDat[fld , c(1:4)])
+  #get the testing accuracy of the model
+  results <- c(results, mean(irisDat$Species[fld] == preds$class) * 100)
+} 
+
+paste("After", length(results), "validation iterations the mean classification accuracy of the model is", paste0(round(mean(results),2), "%"))
+```
+
+Now lets take a look at the summary of the fit and visualize the LDA results. Remember that since we have 3 classes there are at most 2 linear discriminants.
+```{r}
+lda.fit <- lda(Species ~ . , data = irisDat)
+
+lda.fit
+
+ggplot(irisDat, aes(as.matrix(irisDat[,-5]) %*% lda.fit$scaling[,1], as.matrix(irisDat[,-5]) %*% lda.fit$scaling[,2], colour = Species, shape = Species)) + 
+  geom_point(size = 2.5) + 
+  labs(x = 'LD1', y = 'LD2')
+
+```
