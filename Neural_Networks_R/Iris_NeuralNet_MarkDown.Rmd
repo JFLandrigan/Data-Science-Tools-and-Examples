@@ -1,0 +1,133 @@
+---
+title: "Using neuralnet in R"
+author: "Jon Landrigan"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is an example script for training a neural network classifier in R. In this example I use the Iris Data Set which is available for download at: https://www.kaggle.com/uciml/iris. In short the dataset contains the data for the sepal length and width as well as the petal length and width for 3 different species of Iris's (totalling 150 observations).
+
+IMPORTANT: the nerual network may not always converge to the error threshold resulting in the neuralnet function
+to error out. A good first step in avoiding this issue is increasing the stepmax or increasing the error threshold. 
+
+Step1: Read in the required packages and data.
+```{r, message = FALSE}
+#Read in the required packages
+library(neuralnet)
+library(caret)
+library(reshape2)
+library(ggplot2)
+library(stringr)
+
+#Read in the data
+irisData <- read.csv(file="iris.csv", head = TRUE, sep = ",")
+```
+
+Step 2: Take a look at the data to get an idea of what is present in the dataset and what type of data it contains.
+```{r}
+#Get a summary of the data
+summary(irisData)
+str(irisData)
+```
+
+Step 3: Check the data for any missing values. There are multiple ways to do this but in this example I use the colsums function to determine how many missing values are in each column if any.
+```{r}
+#Check how many missing values are in each column. Note that this won't always work as sometimes missing data is filled in with dummy values. This code simply gets the totals number of NA values and will be tricked if there are dummy values standing in for true missing data. 
+colSums(is.na(irisData))
+```
+
+
+Step 4: Perform any data cleaning tha is necessary. In this ecample I wil remove the "Iris-" from the species column. This is primarly because if left in, it could cause issues later when constructing the model formula but also because it is redundant to have.
+```{r}
+irisData$Species <- str_replace(irisData$Species, "Iris-","")
+```
+
+Step 5: Look at the data visually to get an idea of which predictors may be the best for the model. 
+```{r}
+ggplot(irisData, aes(SepalLengthCm, SepalWidthCm, color = Species)) + geom_point()
+ggplot(irisData, aes(PetalLengthCm, PetalWidthCm, color = Species)) + geom_point()
+```
+
+Step 6: In order to feed the data into the network it needs to be normalized or scaled. If it is not scaled the model will either be extremly hard to train or will result in uninterpretable results. Note I am only scaling the feature columns. 
+```{r}
+irisData[,2:5] <- scale(irisData[,2:5])
+```
+
+Step 7: Because the neuralnet package does not like factors, the outcome variable needs to be adjusted. In this example I transform the outcome variable into target vectors across 3 columns. 
+```{r}
+irisData <- cbind(irisData, model.matrix(~ 0 + Species, irisData))
+```
+
+Step 8: Split the data into training and testing data. In this example I split the data so that 75% is used for training and 25% is used for testing.
+```{r}
+#set the seed to get reproducible results
+set.seed(44)
+#Get a random sample of indeces
+trainInds <- sample(1:dim(irisData)[1],112)
+#Get the indeces for the test data
+testInds <- setdiff(1:150, trainInds) 
+```
+
+Step 9: Create the model formula. 
+```{r}
+#Get the variable names for the input and output
+predictorVars <- names(irisData)[2:5]
+outcomeVars   <- names(irisData)[7:9]
+#Paste together the formula 
+modFormula <- as.formula(paste(paste(outcomeVars, collapse = "+"), "~", paste(predictorVars, collapse = " + ")))
+modFormula
+```
+
+Step 10: Train the network. There are no hard rules in terms of threshold, steps and hidden layers. These are parameters that can be tuned in order to improve the network performance. 
+```{r}
+irisNet <- neuralnet(formula = modFormula, data = irisData[trainInds,], 
+                     hidden = c(4), linear.output = FALSE, threshold = .01, stepmax = 5000)
+```
+
+Step 11: See how well the network did by looking at its classification accuracy.
+```{r}
+#Note that we have to remove the column that contains the values to be predicted
+classes <- compute(irisNet, irisData[testInds,-c(1,6:9)])
+
+#Get the classification results out of classes
+classRes <- classes$net.result
+#Using the apply funciton in cunjunction with the which.max function I get the max index 
+#for each row of the classRes matrix and the test rows of original data
+nnClass <- apply(classRes, MARGIN = 1, which.max)
+origClass <- apply(irisData[testInds, c(7:9)], MARGIN = 1, which.max)  
+
+#get the percent correct classification for the neural network 
+paste("The classification accuracy of the network is", round(mean(nnClass == origClass) * 100, digits = 2), "%")
+```
+
+
+Although these seem like good results this may simply be a result of the subseted training and testing data so it is important to test the model performance further. In this example I will perform k-fold cross validation using 10 folds (10 fold cross validation)
+
+Step 12: Validate the Model
+```{r}
+#get the testing indeces using the createFolds function provided by the caret package
+folds <- createFolds(irisData$Species, k = 10)
+
+#results is a vector that will contain the accuracy for each of the network trainings and testing
+results <- c()
+
+for (fld in folds){
+  
+  #train the network (note I have subsetted out the indeces in the validation set)
+  nn <- neuralnet(formula = modFormula, data = irisData[-fld,], hidden = c(4), 
+                  linear.output = FALSE, threshold = .01, stepmax = 5000)
+  
+  #get the classifications from the network
+  classes <- compute(nn, irisData[fld ,-c(1,6:9)])
+  
+  #Check the accuracy of the network using the same procedure as above
+  classRes <- classes$net.result
+  nnClass <- apply(classRes, MARGIN = 1, which.max)
+  origClass <- apply(irisData[fld , c(7:9)], MARGIN = 1, which.max)  
+  results <- c(results, mean(nnClass == origClass) * 100)
+} 
+
+paste("After", length(results), "validation loops the mean accuracy of the network is", paste0(round(mean(results),2), "%"))
+```
