@@ -1,0 +1,128 @@
+---
+title: "Working with LASSO"
+author: "Jon-Frederick Landrigan"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this workflow I present two basic examples of LASSO. In short LASSO fits a model and selects the most informative predictors at the same time by applying a tunable parameter lambda which forces the coefficients of predictors to zero. This therefore results in sparser models that are easier to work with and interpret. Morevoer, below I first use LASSO with liinear regression and then I use LASSO with logistic regression for classification. The data that is used for the examples comes from the ISLR package available for R. For more information about ISLR visit: http://www-bcf.usc.edu/~gareth/ISL/. 
+
+First we need to import the packages for the analysis. 
+```{r, message=FALSE, warning=FALSE}
+library(glmnet) #Package with functions for performing lasso and cross validation
+library(ISLR) #Contains datasets that will be using for examples
+```
+
+As discussed above the first example will be using LASSO to identify a subset of predictors in a linear regression model. The data that will be used is the Wage dataset from the ISLR package. We will store the Wage dataset in the dat variable so that any changes I make will not alter the underlying data.
+```{r}
+dat <- Wage
+#Check the data for missing values
+paste("There are",sum(is.null(dat)), "values missing")
+```
+
+Now lets take a look at what the dataset contains. 
+```{r}
+#Look at the first few rows of the dataframe
+head(dat)
+#Get the data types of the data
+str(dat)
+```
+
+The cv.glmnet function which will be used to perform LASSO expects the input data as a matrix. Therefore using the model.matrix() function I will convert the dataframe into a model matrix. Importantly model.matrix() also converts predictors that are factors to on hot encoded feature columns. Finally I also store the outcome variable in y. 
+```{r}
+#Create the model matrix
+x <- model.matrix(wage ~., dat)
+#Remove the first column which contains the intercept values and the last column which contains the log(wage) values
+x <- x[,-c(1,26)]
+#Stroe the outcome variable in y
+y <- dat$wage
+```
+
+Now that the data is in a format that can be used with cv.glm(), LASSO can be performed.
+```{r}
+#Set the random state seed for reproducibility
+set.seed(1)
+
+#Perform 10 fold cross validation and get the optimal lambda value. Setting alpha = 1 tells cv.glmnet to perfom lasso
+#Note you can either provide cv.glmnet with a range of lambda values to search or leave the lambda argument as null and let cv.glmnet choose the sequence of values to test
+cv.out <- cv.glmnet(x, y, alpha = 1, nfolds = 10)
+
+#Get the optimal lambda value
+bestlam <- cv.out$lambda.min
+paste("The optimal value of lambda is:", cv.out$lambda.min)
+
+#Plot the mean squared error for each value of lambda 
+plot(cv.out)
+```
+
+Now that the optimal value of lambda has been found we can take a look at the predictors and there coefficients. By default a sparse matrix is returned.
+```{r}
+coef(cv.out, s = "lambda.min")
+```
+
+Looking at the output it can be seen that all the coefficients of the region featues were pushed to 0 and therefore when fitting models in the future the region feature can potentially be ignored.
+
+Even though the model identified a reduced set of predictors it is still good to look and see how the model performed at this value of lambda in terms of its root mean squared error.
+```{r}
+paste("The root mean squared error is:", round(sqrt(cv.out$cvm[which(cv.out$lambda == bestlam)]),2))
+paste("The range of the wages in the dataset is:", round(min(dat$wage),2), "-", round(max(dat$wage),2))
+```
+
+As we can see the rmse is 34.08 which while isn't dead on is still decent considering the value of wages in the dataset ranges from 20.09 to 318.34. Although model performance could be improved for the purposes of this example I am going to stop here and move onto the example of using LASSO with logistic regression.
+
+For this example I will be using the OJ dataset from the ISLR package. Just as earlier I store the OJ dataset in the dat variable to prevent changes to the underlying OJ data. 
+```{r}
+dat <- OJ
+```
+
+Again I will check for null values and look at the first few rows of the dataframe and the data types within the dataframe.
+```{r}
+paste("There are",sum(is.null(dat)), "values missing")
+head(dat)
+str(dat)
+```
+
+Looking at the data types it is apparent that a number of features which are supposed to be categorical are actually numeric, therefore before moving on with the analysis I will code them as factors.
+```{r}
+dat$StoreID <- as.factor(dat$StoreID)
+dat$STORE <- as.factor(dat$STORE)
+dat$SpecialCH <- as.factor(dat$SpecialCH)
+dat$SpecialMM <- as.factor(dat$SpecialMM)
+```
+
+
+Now that the data is in a more appropriate format I will now walk through the same steps as above to fit the model using LASSO with the exception of one critical component. When making the call to cv.glmnet the family argument needs to be set to binomial so that a logistic regression is performed.
+```{r}
+#Add a recoded variable to dat dataset to represent Purchase
+dat$Purchase_Recode <- ifelse(dat$Purchase == "CH", 1, 0)
+  
+#Define the model matrix and outcome vector
+x <- model.matrix(Purchase_Recode ~., dat[,-c(1)])[,-1]
+y <- dat$Purchase_Recode
+
+#Run cv.glmnet with family set to binomial. Note that setting the type.measure argument to class gives the missclasification error.
+cv.out <- cv.glmnet(x, y, family="binomial", alpha = 1, nfolds = 10, type.measure = "class")
+
+#Get the optimal lambda value and the index for it
+bestlam <- cv.out$lambda.min
+lambda.ind <- which(cv.out$lambda == bestlam)
+
+#Plot the misclassification error against the log(lambda) values
+plot(cv.out)
+```
+
+Again now that LASSO has been run I will look at the predictors using a call to coef().
+```{r}
+coef(cv.out, s = "lambda.min")
+```
+
+Looking at the above output it is clear that performing LASSO reduced the number of predictors. However, even though it reduced the number of predictors it is still important to take a look at the models performance. 
+```{r}
+paste("The misclassification error of the model at lambda.min is:", round(cv.out$cvm[lambda.ind],2))
+```
+
+As can be seen the model performs pretty well with a misclassification error of .16 or in other words the model is 84% accurate. It should also be noted that providing the predict() function with the model object provides users with other useful options as well including being able to set the "type" argument to "class" for the predicted class label or "response" to obtain the fitted probabilities.
+
+Moreover, LASSO is a flexible tool that can be used when presented with a dataset that contains a large number of predictors or features. As shown it can be used in the context of both continuous and categorical outcomes and produces models with a reduced number of features that are easier to work with and interpret. 
