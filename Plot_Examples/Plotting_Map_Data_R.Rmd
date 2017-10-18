@@ -1,0 +1,128 @@
+---
+title: "Plotting Map Data in R"
+author: "Jon-Frederick Landrigan"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The following are examples of plotting map based data using ggplot and ggmap. The plots are made using data from: https://www.kaggle.com/camnugent/ufo-sightings-around-the-world. This dataset contains data related to ufo sightings from around the world.
+
+Import the packages that are needed for the plots
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(ggthemes) #contains theme_map() which removes axes and gridines.
+library(maps)
+library(ggmap) #used for getting map images from the internet
+library(plyr)
+```
+
+The first couple of plots will focus on sightings in the US so we will subset the dataset to only include sightings in the US.
+```{r}
+#Read in the data
+ufo <- read.csv("ufo_sighting_data.csv", header = TRUE)
+#Subset the data to only include sightings in the US
+ufo.us <- subset(ufo, country == "us")
+```
+
+In the first plot we will use a google map image and place points at the longitude and latitude coordinates of the sightings. 
+```{r, message=FALSE, warning=FALSE}
+#In order to plot the points the data needs to be numerics. Note that the latitude is read in as a factor so it needs to first be converted to type character and then a numeric
+ufo.us$latitude2 <- as.numeric(as.character(ufo.us$latitude))
+ufo.us$longitude2 <- as.numeric(ufo.us$longitude)
+
+#Get the map image from google maps. The zoom argument controls how close or far the image is from 3 (continent) to 21 (building)
+USMap <- get_map("USA", zoom = 4)
+
+#Make the image
+ggmap(USMap) + 
+  #Add points for each sighting
+  geom_point(data = ufo.us, aes(x = longitude2, y = latitude2), size = .075) +
+  theme_map()
+
+```
+
+Although this plot shows the individual sightings because there are so many it is actually pretty hard to get any specific information beyond where there appear to be clusters of sightings. Another way to visualize this data is to look at a specific state. For this example lets take a look at California.
+
+```{r, message=FALSE, warning=FALSE}
+#Subset the data to only include sightings in california
+cali_dat <- subset(ufo.us, state.province == "ca")
+#Download the california map from google.
+Cali_Map <- get_map("California, USA", zoom = 6, maptype = "terrain")
+#Make the plot
+ggmap(Cali_Map) + geom_point(data = cali_dat, aes(x = longitude2, y = latitude2)) + 
+  theme_map()
+```
+
+Looking at the data from this perspective can be useful in terms of seeing where the sightings cluster within a state and there are a number of other ways to visualize the data but for the purposes of this example we will move on. 
+
+Now we will create a heat map of the number of sighting by state in the US.
+
+First lets create a dataframe that contains the frequency counts in terms of the number of sightings per state.
+```{r}
+#Get the number of reported sightings per state (the count() is from plyr)
+state_counts <- count(ufo.us$state.province)
+
+#Make the abbreviations uppercase
+state_counts$x <- toupper(state_counts$x)
+#remove DC ad Puerto Rico since they are not in the state_map data 
+state_counts <- state_counts[-c(8,40),]
+```
+
+First we will load some state data including abbreviations and names into the workspace.
+```{r}
+data(state)
+```
+
+In order to plot the number of sightings by state we will need to get the full name of the states because the state_map data uses the full names and not the abbreviations.
+```{r}
+#Loop through the abbreviations and get the full state name 
+State_Names <- c()
+for(abr in state_counts$x){
+  #Get the index of the abbreviation
+  ind <- which(state.abb == abr)
+  #Create parrallel vector with full state names in lower case
+  State_Names <- c(State_Names, tolower(state.name[ind]))
+}
+#Append the full state names to the state_counts dataframe
+state_counts$StateName <- State_Names
+
+```
+
+Now that we have the full name of the states we can plot the count data. 
+```{r,message=FALSE, warning=FALSE}
+#Load the us state map
+states_map <- map_data("state")
+
+#Plot the data by state
+ggplot(state_counts, aes(map_id = StateName, fill = freq)) + geom_map(map = states_map) + 
+  scale_fill_gradient(name = "freq",low="blue", high="red") +
+  expand_limits(x = states_map$long, y = states_map$lat) +
+  theme_map()
+```
+
+This is a really simple plot but powerful in terms of how it allows the viewer to see where the majority of the reported sightings appear or conversely where there really haven't been many reported. 
+
+Finally we can also look at the number of sightings by country. Unfortunatley the dataset doesn't contain sightings from every country nor a majority of countries in the world but it still allows use to see how the data can be plotted.
+```{r, message=FALSE, warning=FALSE}
+#The first row of the count dataframe is blank so we remove it right from the start.
+country_count <- count(ufo$country)[-c(1),]
+#Append the full names of the countries to the count dataframe.
+country_count$CountryName <- c("Australia", "Canada", "Germany", "UK", "USA")
+
+#Load the world_map dataframe.
+world_map <- map_data("world")
+
+#Since the count dataframe does not contain data for every country in the world we will merge it with the world_map dataframe so that all the countries are plotted even if their are no reported sightings
+world_map <- merge(world_map, country_count, by.x = "region", by.y = "CountryName", all.x = TRUE)
+
+#Plot the results
+ggplot(world_map, aes(map_id = region, fill = freq)) + geom_map(map = world_map) +
+  expand_limits(x = world_map$long, y = world_map$lat) +
+  scale_fill_gradient(name = "freq",low="blue", high="red") + 
+  theme_map()
+  
+```
+
+Although these were fairly simple examples the important thing to remember is that they were all built using ggplot which means that there is a lot of flexibility in terms of plotting options. 
