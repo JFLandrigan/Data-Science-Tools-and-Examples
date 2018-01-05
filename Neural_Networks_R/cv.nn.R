@@ -35,7 +35,7 @@ cv.nn <- function(dat = NA, inVars = NA, outVars = NA, hidLayers = NA, foldCol =
   
     }else{
       #Calc the mean classification accuracy
-      classRes <- predss$net.result
+      classRes <- preds$net.result
       nnClass <- apply(classRes, MARGIN = 1, which.max)
       origClass <- apply(dat[fld , outVars], MARGIN = 1, which.max)  
       results <- c(results, mean(nnClass == origClass) * 100)
