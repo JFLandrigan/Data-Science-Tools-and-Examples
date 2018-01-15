@@ -30,8 +30,8 @@ def get_data(direct = os.getcwd(), tp = 'neg'):
     return(revs)
     
 #Call the get_data function which returns lists of tuples (each tuple is vec of words and type)
-posData = get_data(direct = '/Users/jonlandrigan/Dropbox/Data Science Resources/NLTK_MovieReviews/movie_reviews/pos/', tp = "pos")
-negData = get_data(direct = '/Users/jonlandrigan/Dropbox/Data Science Resources/NLTK_MovieReviews/movie_reviews/neg/', tp = "neg")
+posData = get_data(direct = 'movie_reviews/pos/', tp = "pos")
+negData = get_data(direct = 'movie_reviews/neg/', tp = "neg")
 
 #Combine the positive and negative review lists
 all_revs = posData + negData
