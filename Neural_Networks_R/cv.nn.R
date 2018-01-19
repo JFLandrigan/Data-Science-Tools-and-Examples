@@ -1,6 +1,7 @@
 cv.nn <- function(dat = NA, inVars = NA, outVars = NA, hidLayers = NA, foldCol = NA, numFolds = 10, 
                   learn_rate = .01, lin_out = FALSE, thresh = .01, steps = 100000, alg = 'rprop+'){
   
+  #Function to run k-fold cross validation with neuralnet
   #The function requires the caret and neuralnet packages to be used.
   #The alg argument can accept any of the algorithms supported by neuralnet()
   #outVars and inVars should be vectors containing the names of inputs (inVars) and the output(s) (outVars)
@@ -10,6 +11,7 @@ cv.nn <- function(dat = NA, inVars = NA, outVars = NA, hidLayers = NA, foldCol =
   #load required packages
   require(caret)
   require(neuralnet)
+  require(plyr)
   
   #set up the model formula
   mod.formula <- as.formula(paste(paste(outVars, collapse = "+"), "~", paste(inVars, collapse = " + ")))
