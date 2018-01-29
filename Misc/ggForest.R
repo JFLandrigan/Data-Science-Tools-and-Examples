@@ -1,6 +1,8 @@
-ggForest <- function(metaObj = NA, ES_Text = TRUE){
+ggForest <- function(metaObj = NA, labs = NA, ES_Text = TRUE){
   
   #expects a meta-analysis object returned from the metaFor rma.uni
+  #labs: vector of study names note it should be in the order of the studys in the metaobj
+  #ES_Text: logical whether or not to add the effect size and standard error to the plot
   
   #load likert package for reverse.levels functions
   require(likert)
@@ -9,9 +11,14 @@ ggForest <- function(metaObj = NA, ES_Text = TRUE){
   #load gridExtra for arranging plots when text wanted
   require(gridExtra)
   
+  #If no labels passed in use the labels from the meta object else use the supplied labels
+  if(is.na(labs)){
+    labs <- metaObj$slab
+  }
+  
   #Construct a dataframe with the relevant information for plotting
-  df <- data.frame(Study = metaObj$slab, EffectSizes = metaObj$yi, SE = metaObj$vi, 
-                   Type = rep("Reference",length(metaObj$slab)))
+  df <- data.frame(Study = labs, EffectSizes = metaObj$yi, SE = metaObj$vi, 
+                   Type = rep("Reference",length(labs)))
   
   #Add the overall effect to the dataframe
   df <- rbind(df, data.frame(Study = "Overall", EffectSizes = metaObj$beta[1], SE = metaObj$se[1],
