@@ -7,6 +7,7 @@ cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds =
   #output arg should be the name of the column containing the output values
   #hidLayers expects a vector containg the numerical values for the number of units in each hidden layer 
   #The alg argument can accept any of the algorithms supported by neuralnet()
+  #NOTE for classification the returned classMat should be read moving across the columns 
   
   #load required packages
   require(caret)
