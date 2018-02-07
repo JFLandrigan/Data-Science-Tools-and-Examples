@@ -1,7 +1,7 @@
 cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds = 10, 
                   learn_rate = .01, lin_out = FALSE, thresh = .01, steps = 100000, alg = 'rprop+'){
   
-  #The function requires the caret and neuralnet packages to be used.
+  #The function requires the caret, neuralnet and plyr packages to be used.
   #dat should be a dataframe containing all the input and output data
   #inVars should be a vector containing the names of the columns for the input variables
   #output arg should be the name of the column containing the output values
@@ -12,6 +12,7 @@ cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds =
   #load required packages
   require(caret)
   require(neuralnet)
+  require(plyr)
   
   if(lin_out == FALSE){
     #generate the one hot encoding matrix
