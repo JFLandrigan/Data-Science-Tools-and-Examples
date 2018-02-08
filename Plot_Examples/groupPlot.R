@@ -36,10 +36,12 @@ groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALS
   
   
   #Define the rectangles to be plotted in the background og the plot
-  rects <- data.frame(xmin = seq(0.5,length(measureVars)+.5,1), 
-                      xmax = seq(1.5,length(measureVars)+1.5,1),
-                      ymin = -Inf, 
-                      ymax = Inf)
+  rectangles <- data.frame(
+    xmin = seq(1.5, length(measureVars)+.5, by=2) - 1,
+    xmax = seq(1.5, length(measureVars)+.5, by=2),
+    ymin = -Inf,
+    ymax = Inf
+  )
   
   #generate the plot
   p <- ggplot() +
