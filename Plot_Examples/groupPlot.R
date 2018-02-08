@@ -1,4 +1,4 @@
-groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALSE, horizontal = TRUE, groupColors = "Set1", xlabel = "", ylabel =""){
+groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALSE, horizontal = TRUE, groupColors = "Set1", rotateXLab = FALSE, xlabel = "", ylabel =""){
   
   #clustPlot function used for plotting mean measures for clusters of 
   #dat - expects a dataframe in wide format i.e. each row is a single observation and the columns are the measurement dimensions
@@ -7,6 +7,7 @@ groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALS
   #scale - default is FALSE if set to true then measureVars are scaled
   #horizontal - default is TRUE, flipping the coordinates of the plot
   #groupColors - palette colors (options are those available for scale_fill_brewer)
+  #rotateXLab - if set to TRUE then rotates the x axis tick labels
   
   #load ggplot
   require(ggplot2)
@@ -62,6 +63,10 @@ groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALS
   #if the horizontal flag is TRUE then flip the plot onto its side
   if(horizontal){
     p <- p + coord_flip()
+  }
+  #if rotateXlab then rotates the x axis labels 90 degrees
+  if(rotateXLab){
+    p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
   }
     
   #return the plot object
