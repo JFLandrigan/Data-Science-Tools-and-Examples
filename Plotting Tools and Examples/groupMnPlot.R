@@ -1,4 +1,4 @@
-groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALSE, horizontal = TRUE, groupColors = "Set1", rotateXLab = FALSE, xlabel = "", ylabel =""){
+groupMnPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALSE, horizontal = TRUE, groupColors = "Set1", rotateXLab = FALSE, xlabel = "", ylabel =""){
   
   #clustPlot function used for plotting mean measures for clusters of 
   #dat - expects a dataframe in wide format i.e. each row is a single observation and the columns are the measurement dimensions
