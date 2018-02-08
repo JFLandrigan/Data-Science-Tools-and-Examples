@@ -17,11 +17,11 @@ groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALS
   
   #if scale is true then perform scaling on the measurement columns
   if(scale){
-    dat[,measureCols] <- scale(dat[,measureVars])
+    dat[,measureVars] <- scale(dat[,measureVars])
   }
   
   #generate table that has mean measure values by each cluster
-  mf <- as.formula(paste(paste(measureVars, collapse = "+"), "~", clustCol))
+  mf <- as.formula(paste(paste(measureVars, collapse = "+"), "~", groupingCol))
   mnDat <- as.data.frame(t(summaryBy(mf, data = dat, FUN = c(mean), keep.names = TRUE, na.rm = TRUE)))[2:(length(measureVars)+1),]
   colnames(mnDat) <- unique(dat[,groupingCol])
   #add the measures to the mean dataframe
