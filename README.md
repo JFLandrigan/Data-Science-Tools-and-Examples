@@ -1,4 +1,4 @@
-# Data Science Examples
+# Data Science Tools and Examples
 
 This repository contains tools, examples and workflows for performing different types of analyses.
 
