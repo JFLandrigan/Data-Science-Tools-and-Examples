@@ -17,7 +17,7 @@ groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALS
   
   #if scale is true then perform scaling on the measurement columns
   if(scale){
-    dat[,measureCols] <- scale(dat[,measureCols])
+    dat[,measureCols] <- scale(dat[,measureVars])
   }
   
   #generate table that has mean measure values by each cluster
