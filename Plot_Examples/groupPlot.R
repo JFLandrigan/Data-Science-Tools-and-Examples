@@ -1,4 +1,4 @@
-groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALSE, horizontal = TRUE, groupColors = "Set1"){
+groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALSE, horizontal = TRUE, groupColors = "Set1", xlabel = "", ylabel =""){
   
   #clustPlot function used for plotting mean measures for clusters of 
   #dat - expects a dataframe in wide format i.e. each row is a single observation and the columns are the measurement dimensions
@@ -52,8 +52,8 @@ groupPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALS
     scale_fill_brewer(palette = groupColors) +
     geom_hline(yintercept = 0, colour = "black") +
     #geom_vline(xintercept = seq(1.5, length(measureVars) + .5, by = 1)) +
-    xlab("") +
-    ylab("") +
+    xlab(xlabel) +
+    ylab(ylabel) +
     theme_bw(base_size=12) + 
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
   
