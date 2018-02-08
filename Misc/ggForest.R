@@ -52,9 +52,9 @@ ggForest <- function(metaObj = NA, labs = NA, ES_Text = TRUE){
   #if ES_Text is TRUE create a plot with the effect sizes and return both plots as grid obj
   if(ES_Text){
     #Create a column with the ES and CI pasted together
-    df$ES_CI_Txt <- paste(str_pad(sprintf("%.2f", round(df$EffectSizes,2)), 3), " ", 
-                          paste0("[", str_pad(sprintf("%.2f",round(df$lower_ci,2)),3), ", ", 
-                                 str_pad(sprintf("%.2f",round(df$upper_ci,2)),3), "]"))
+    df$ES_CI_Txt <- paste(str_pad(sprintf("%.2f", round(df$EffectSizes,2)), 6), " ", 
+                          paste0("[", str_pad(sprintf("%.2f",round(df$lower_ci,2)),6), ", ", 
+                                 str_pad(sprintf("%.2f",round(df$upper_ci,2)),6), " ]"))
     
     t <- ggplot(df, aes(x = rep("SMD [95% CI]", length(Study)), y = Study, label = ES_CI_Txt)) +
       geom_text() +
