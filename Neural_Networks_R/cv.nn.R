@@ -1,24 +1,22 @@
 cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds = 10, 
                   learn_rate = .01, lin_out = FALSE, thresh = .01, steps = 100000, alg = 'rprop+'){
   
-  #The function requires the caret, neuralnet and plyr packages to be used.
+  #The function requires the caret and neuralnet packages to be used.
   #dat should be a dataframe containing all the input and output data
   #inVars should be a vector containing the names of the columns for the input variables
   #output arg should be the name of the column containing the output values
   #hidLayers expects a vector containg the numerical values for the number of units in each hidden layer 
   #The alg argument can accept any of the algorithms supported by neuralnet()
-  #NOTE for classification the returned classMat should be read moving across the columns 
   
   #load required packages
   require(caret)
   require(neuralnet)
-  require(plyr)
   
   if(lin_out == FALSE){
     #generate the one hot encoding matrix
     outMat <- model.matrix(~ 0 + dat[,output], dat)
     #change the names of the outMat and store the names of the outcome variables
-    colnames(outMat) <- unique(dat[,output])
+    colnames(outMat) <- as.character(unique(dat[,output]))
     outnames <- colnames(outMat)
     
     #bind the one hot encoding matrix to the dat
