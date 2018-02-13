@@ -11,6 +11,7 @@ cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds =
   #load required packages
   require(caret)
   require(neuralnet)
+  require(plyr)
   
   if(lin_out == FALSE){
     #generate the one hot encoding matrix
