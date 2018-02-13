@@ -16,7 +16,7 @@ cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds =
     #generate the one hot encoding matrix
     outMat <- model.matrix(~ 0 + dat[,output], dat)
     #change the names of the outMat and store the names of the outcome variables
-    #colnames(outMat) <- unique(dat[,output])
+    colnames(outMat) <- unique(dat[,output])
     outnames <- colnames(outMat)
     
     #bind the one hot encoding matrix to the dat
