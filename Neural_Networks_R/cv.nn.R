@@ -1,6 +1,7 @@
 cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds = 10, 
                   learn_rate = .01, lin_out = FALSE, thresh = .01, steps = 100000, alg = 'rprop+'){
   
+  #This function runs cross validation for neural networks
   #The function requires the caret and neuralnet packages to be used.
   #dat should be a dataframe containing all the input and output data
   #inVars should be a vector containing the names of the columns for the input variables
