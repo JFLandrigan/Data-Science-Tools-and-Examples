@@ -1,4 +1,4 @@
-groupMnPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALSE, horizontal = TRUE, groupColors = "Set1", rotateXLab = FALSE, xlabel = "", ylabel =""){
+groupMnPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FALSE, horizontal = TRUE, groupColors = "Set1", rotateXLab = FALSE, groupLabel = "", xlabel = "", ylabel =""){
   
   #clustPlot function used for plotting mean measures for clusters of 
   #dat - expects a dataframe in wide format i.e. each row is a single observation and the columns are the measurement dimensions
@@ -52,7 +52,7 @@ groupMnPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FA
     geom_bar(data = loadings.dat, aes(x = measures, y = value, fill = Groups), 
              stat = "identity",position = "dodge") +
     scale_x_discrete(limits = levels(loadings.dat$measures)) +
-    scale_fill_brewer(palette = groupColors) +
+    scale_fill_brewer(palette = groupColors, name = groupLabel) +
     geom_hline(yintercept = 0, colour = "black") +
     #geom_vline(xintercept = seq(1.5, length(measureVars) + .5, by = 1)) +
     xlab(xlabel) +
@@ -68,7 +68,7 @@ groupMnPlot <- function(dat = NA, groupingCol = NA, measureVars = NA, scale = FA
   if(rotateXLab){
     p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
   }
-    
+  
   #return the plot object
   return(p)
   
