@@ -22,7 +22,7 @@ ggBiasFigs <- function(dat = NA, grid = TRUE, bar = TRUE){
   if(grid){
   
     gr <- ggplot(longDat, aes(Study, variable, fill = value)) + 
-      geom_raster() + 
+      geom_tile(aes(width = 0.95, height = 0.95)) + 
       #set colors
       scale_fill_gradient2(low = "red", mid = "yellow", high = "green", midpoint = 0) +
       #black and white theme with set font size
