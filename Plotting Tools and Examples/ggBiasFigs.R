@@ -26,13 +26,15 @@ ggBiasFigs <- function(dat = NA, grid = TRUE, bar = TRUE,  sumFig = TRUE){
       #set colors
       scale_fill_manual(name = "Bias",
                         values = c("-1" = "red", "0" = "yellow", "1" = "green"), 
-                        labels = c("high", "uncertain", "low")) +
+                        labels = c("High", "Uncertain", "Low")) +
       #black and white theme with set font size
       theme_bw(base_size = 10) + 
       #rotate x-axis labels so they don't overlap, get rid of unnecessary axis titles, adjust plot margins
-      theme(axis.text.x = element_text(angle = 90), 
+      theme(axis.text.x = element_text(angle = 90, size = 10),
+            axis.text.y = element_text(size = 10),
             axis.title.x = element_blank(), 
-            axis.title.y = element_blank()) # + guides(fill = F)
+            axis.title.y = element_blank(),
+            legend.text=element_text(size=10)) # + guides(fill = F)
   
   }else{gr <- NA}
   
@@ -50,13 +52,15 @@ ggBiasFigs <- function(dat = NA, grid = TRUE, bar = TRUE,  sumFig = TRUE){
       scale_y_continuous(labels = scales::percent) +
       scale_fill_manual(name = "Bias",
                         values = c("-1" = "red", "0" = "yellow", "1" = "green"), 
-                        labels = c("high", "uncertain", "low")) +
+                        labels = c("High", "Uncertain", "Low")) +
       #flip the coordinates so studies along y
       coord_flip() +
-      theme_bw() +
-      theme(axis.text.x = element_text(angle = 90), 
+      theme_bw(base_size = 10) +
+      theme(axis.text.x = element_text(angle = 90, size = 10),
+            axis.text.y = element_text(size = 10), 
             axis.title.x = element_blank(), 
-            axis.title.y = element_blank()) #+ guides(fill = T)
+            axis.title.y = element_blank(),
+            legend.text=element_text(size=10)) #+ guides(fill = T)
     
   }else{br <- NA}
   
@@ -69,13 +73,15 @@ ggBiasFigs <- function(dat = NA, grid = TRUE, bar = TRUE,  sumFig = TRUE){
       scale_y_continuous(labels = scales::percent) +
       scale_fill_manual(name = "Bias",
                         values = c("-1" = "red", "0" = "yellow", "1" = "green"), 
-                        labels = c("high", "uncertain", "low")) +
+                        labels = c("High", "Uncertain", "Low")) +
       #flip the coordinates so studies along y
       coord_flip() +
-      theme_bw() +
-      theme(axis.text.x = element_text(angle = 90), 
+      theme_bw(base_size = 10) +
+      theme(axis.text.x = element_text(angle = 90, size = 10),
+            axis.text.y = element_text(size = 10), 
             axis.title.x = element_blank(), 
-            axis.title.y = element_blank())
+            axis.title.y = element_blank(),
+            legend.text=element_text(size=10))
     
   }else{sf < NA}
   
