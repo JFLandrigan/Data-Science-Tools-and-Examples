@@ -17,6 +17,8 @@ ggBiasFigs <- function(dat = NA, grid = TRUE, bar = TRUE,  sumFig = TRUE){
   longDat <- melt(dat, 
                   id.vars = "Study", 
                   measure.vars = colnames(dat)[2:dim(dat)[2]])
+  #Clean up the variable names (col names with space are read in with .)
+  longDat$variable <- gsub(".", replacement = " ", longDat$variable, fixed = TRUE)
   
   
   if(grid){
