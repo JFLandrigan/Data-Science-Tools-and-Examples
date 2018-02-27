@@ -1,5 +1,5 @@
 cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds = 10, 
-                  learn_rate = .01, lin_out = FALSE, thresh = .01, steps = 100000, alg = 'rprop+'){
+                  learn_rate = .01, lin_out = FALSE, thresh = .01, steps = 100000, reps = 1, alg = 'rprop+'){
   
   #This function runs cross validation for neural networks
   #The function requires the caret and neuralnet packages to be used.
@@ -50,7 +50,7 @@ cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds =
     
     #train the network 
     nn <- neuralnet(formula = mod.formula, data = dat[-fld,], hidden = hidLayers, algorithm = alg,
-                    learningrate = learn_rate, linear.output = lin_out, threshold = thresh, stepmax = steps) 
+                    learningrate = learn_rate, linear.output = lin_out, threshold = thresh, stepmax = steps, rep = reps) 
     
     #get the classifications from the network
     preds <- compute(nn, dat[fld , inVars]) 
