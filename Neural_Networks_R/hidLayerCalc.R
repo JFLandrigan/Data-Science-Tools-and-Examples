@@ -24,7 +24,7 @@ hidLayerCalc <- function(numInputUnits = NA, numOutputUnits = NA, dropSize = .66
     }
     #if the number of hidden units in the last layer is less then or equal to the number of units in the output layer then
     #stop adding layers and remove the final layer
-    if(hidNums[ct] <= length(clust_outcomeVars)){
+    if(hidNums[ct] <= numOutputUnits){
       hidNums <- hidNums[-length(hidNums)]
       check <- TRUE
     }
