@@ -1,6 +1,8 @@
 #Quick functions
 
 #perform majority vote 
+#dat should be dataframe or matrix where rows = obs and cols = the classifications from
+#dif analyses
 majorityVote <- function(dat = NA, thresh = .5){
   #calc num instances obs needs to be classified
   classThresh <- dim(dat)[2] * thresh
