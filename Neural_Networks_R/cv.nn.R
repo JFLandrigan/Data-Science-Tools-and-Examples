@@ -1,4 +1,4 @@
-cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds = 10, 
+cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds = 10, up = FALSE, down = FALSE,
                   learn_rate = .01, lin_out = FALSE, thresh = .01, steps = 100000, reps = 1, alg = 'rprop+'){
   
   #This function runs cross validation for neural networks
@@ -8,11 +8,25 @@ cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds =
   #output arg should be the name of the column containing the output values
   #hidLayers expects a vector containg the numerical values for the number of units in each hidden layer 
   #The alg argument can accept any of the algorithms supported by neuralnet()
+  #up and down = logical to determine whether or not to perform up-sampling or down-sampling
   
   #load required packages
   require(caret)
   require(neuralnet)
   require(plyr)
+  
+  
+  #if up or down is TRUE perform up or down sampling
+  if(up | down){
+    #grab the input and output data
+    indat <- dat[,inVars]
+    outdat <- dat[,output]
+    if(up){
+      dat <- upSample(x = indat, y = outdat, yname = output)
+    }else{
+      dat <- downSample(x = indat, y = outdat, yname = output)
+    }
+  }
   
   if(lin_out == FALSE){
     #generate the one hot encoding matrix
@@ -25,7 +39,7 @@ cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds =
     dat <- cbind(dat, outMat)
   }else{
     outnames <- output
-    }
+  }
   
   #set up the model formula
   mod.formula <- as.formula(paste(paste(outnames, collapse = "+"), "~", paste(inVars, collapse = " + ")))
@@ -58,7 +72,7 @@ cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds =
     if(lin_out){
       #Calc RMSE
       results <- c(results, sqrt(mean((preds$net.result - dat[fld, outnames])^2)))
-  
+      
     }else{
       #Calc the mean classification accuracy
       classRes <- preds$net.result
