@@ -66,8 +66,13 @@ cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds =
     nn <- neuralnet(formula = mod.formula, data = dat[-fld,], hidden = hidLayers, algorithm = alg,
                     learningrate = learn_rate, linear.output = lin_out, threshold = thresh, stepmax = steps, rep = reps) 
     
-    #get the classifications from the network
-    preds <- compute(nn, dat[fld , inVars]) 
+    #if there were no weights returned then alg did not converge so exit
+    if("weights" %in% names(nn)){
+      #get the classifications from the network
+      preds <- compute(nn, dat[fld , inVars])
+    }else{
+      break()
+    }
     
     if(lin_out){
       #Calc RMSE
