@@ -20,7 +20,7 @@ cv.nn <- function(dat = NA, inVars = NA, output = NA, hidLayers = NA, numFolds =
   if(up | down){
     #grab the input and output data
     indat <- dat[,inVars]
-    outdat <- dat[,output]
+    outdat <- as.factor(dat[,output])
     if(up){
       dat <- upSample(x = indat, y = outdat, yname = output)
     }else{
