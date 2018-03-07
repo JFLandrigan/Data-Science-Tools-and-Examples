@@ -3,7 +3,7 @@ ggBiasFigs <- function(dat = NA, grid = TRUE, bar = TRUE,  sumFig = TRUE){
   #ggBiasFig is a function to make basic figures to display bias information
   #dat - expects a dataframe in wide format with a column called Study containing the study labels and
   #   the bias measures in the subsequent columns (currently the cells should be -1 = high risk, 0 = uncertain,
-  #   1 = low risk) These are based on the cochrane guidelines
+  #   1 = low risk) These are based on the cochrane guidelines (7 measures if more less then need adjustment)
   #grid - logical indicating whether or not to generate a grid plot
   #bar - logical indicating whether or not to generate a percentage bar plot
   #returns a list containing the desired plots
@@ -27,7 +27,7 @@ ggBiasFigs <- function(dat = NA, grid = TRUE, bar = TRUE,  sumFig = TRUE){
       geom_tile(aes(width = 0.95, height = 0.95)) + 
       #set colors
       scale_fill_manual(name = "Bias",
-                        values = c("-1" = "red", "0" = "yellow", "1" = "green"), 
+                        values = c("-1" = "#e41a1c", "0" = "#ffff33", "1" = "#4daf4a"), 
                         labels = c("High", "Uncertain", "Low")) +
       #black and white theme with set font size
       theme_bw(base_size = 10) + 
@@ -53,12 +53,12 @@ ggBiasFigs <- function(dat = NA, grid = TRUE, bar = TRUE,  sumFig = TRUE){
       geom_bar(aes( y = ((..count..)/sum(..count..))*20 )) + 
       scale_y_continuous(labels = scales::percent) +
       scale_fill_manual(name = "Bias",
-                        values = c("-1" = "red", "0" = "yellow", "1" = "green"), 
+                        values = c("-1" = "#e41a1c", "0" = "#ffff33", "1" = "#4daf4a"), 
                         labels = c("High", "Uncertain", "Low")) +
       #flip the coordinates so studies along y
       coord_flip() +
       theme_bw(base_size = 10) +
-      theme(axis.text.x = element_text(angle = 90, size = 10),
+      theme(axis.text.x = element_text(size = 10),
             axis.text.y = element_text(size = 10), 
             axis.title.x = element_blank(), 
             axis.title.y = element_blank(),
@@ -69,17 +69,21 @@ ggBiasFigs <- function(dat = NA, grid = TRUE, bar = TRUE,  sumFig = TRUE){
   if(sumFig){
     
     scaleFact <- length(unique(longDat$variable))
+    longDat$variable <- as.factor(longDat$variable)
+    tmp <- data.frame(variable = levels(longDat$variable), ord = c(2,4,3,5,7,1,6))
+    longDat <- merge(longDat, tmp, by.x = "variable", by.y = "variable")
+    longDat$variable <- reverse.levels(reorder(longDat$variable, longDat$ord))
     
     sf <- ggplot(longDat, aes(variable, fill = as.character(value))) +
       geom_bar(aes( y = ((..count..)/sum(..count..))*7 )) + 
       scale_y_continuous(labels = scales::percent) +
       scale_fill_manual(name = "Bias",
-                        values = c("-1" = "red", "0" = "yellow", "1" = "green"), 
+                        values = c("-1" = "#e41a1c", "0" = "#ffff33", "1" = "#4daf4a"), 
                         labels = c("High", "Uncertain", "Low")) +
       #flip the coordinates so studies along y
       coord_flip() +
       theme_bw(base_size = 10) +
-      theme(axis.text.x = element_text(angle = 90, size = 10),
+      theme(axis.text.x = element_text(size = 10),
             axis.text.y = element_text(size = 10), 
             axis.title.x = element_blank(), 
             axis.title.y = element_blank(),
