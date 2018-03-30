@@ -1,5 +1,18 @@
 #Quick functions
 
+#perform a thresholding based on occurance count
+#obs - should be list containing vectors with the observations
+#thresh - should be int for the cutoff of included obs count
+#returns vector containing the above thresh obs
+cntKeep <- function(obs = NA, thresh = NA){
+  tmp <- c()
+  for(v in obs){
+    tmp <- c(tmp, v)
+  }
+  dat <- data.frame(table(tmp))
+  return(subset(dat, Freq >= thresh)$tmp)
+}
+
 #perform majority vote 
 #dat should be dataframe or matrix where rows = obs and cols = the classifications from
 #dif analyses
