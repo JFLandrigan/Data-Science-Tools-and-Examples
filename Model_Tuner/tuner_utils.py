@@ -4,6 +4,7 @@ import sys
 import time
 import pandas as pd
 import numpy as np
+import pickle
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.linear_model import Lasso, LogisticRegression
 from sklearn.base import clone
@@ -270,7 +271,7 @@ def create_bin_table(df=None, bins=None, bin_col=None, actual_col=None):
     cnts = df[bin_col_name].value_counts().reset_index()
     cnts.columns = [bin_col_name, "count"]
 
-    # Get the percent ivr per bin (rectaken_01 so just mean gives perc)
+    # Get the percent ivr per bin
     percs = df.groupby(by=bin_col_name)[actual_col].mean().reset_index()
     percs.columns = [bin_col_name, "percent_actual"]
 
@@ -397,7 +398,7 @@ def feature_importances(mod=None, X=None, num_top_fts=None):
     return ft_imp_df
 
 
-def log_results(fl_name=None, fl_path=None, log_data=None, tune_test=True):
+def construct_save_path(fl_path=None, fl_name=None, model_name=None):
 
     if "win" in sys.platform:
         ext_char = "\\"
@@ -416,11 +417,22 @@ def log_results(fl_name=None, fl_path=None, log_data=None, tune_test=True):
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
     if fl_name is None:
-        fl_name = log_data["model"] + "_" + timestr + ".txt"
+        fl_name = model_name + "_" + timestr + ".txt"
 
-    print("File path for data log: " + fl_path + fl_name)
+    save_path = fl_path + fl_name
 
-    f = open(fl_path + fl_name, "w")
+    return save_path
+
+
+def log_results(fl_name=None, fl_path=None, log_data=None, tune_test=True):
+
+    save_path = construct_save_path(
+        fl_name=fl_name, fl_path=fl_path, model_name=log_data["model"]
+    )
+
+    print("File path for data log: " + save_path)
+
+    f = open(save_path, "w")
 
     if "note" in log_data.keys():
         f.write(str(log_data["note"]) + " \n \n")
@@ -474,5 +486,25 @@ def log_results(fl_name=None, fl_path=None, log_data=None, tune_test=True):
         f.write(log_data["ft_imp_df"].to_string())
 
     f.close()
+
+    return
+
+
+def pickle_data_model(mod=None, data=None, fl_path=None, fl_name=None):
+
+    if ".txt" in fl_name:
+        fl_name = fl_name.replace(".txt", "")
+
+    # save out the data
+    data_save_path = construct_save_path(fl_path=fl_path, fl_name=fl_name + "_data.pkl")
+    with open(data_save_path, "wb") as handle:
+        pickle.dump(data, handle)
+
+    # save out the model
+    model_save_path = construct_save_path(
+        fl_path=fl_path, fl_name=fl_name + "_" + type(mod).__name__ + ".pkl"
+    )
+    with open(model_save_path, "wb") as handle:
+        pickle.dump(mod, handle)
 
     return

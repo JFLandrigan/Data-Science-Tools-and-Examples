@@ -22,6 +22,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 
 import pandas as pd
 import numpy as np
+import pickle
 
 import time
 
@@ -49,6 +50,7 @@ def tune_test_model(
     log_name=None,
     log_path=None,
     log_note=None,
+    pkl_store=False,
 ):
 
     if random_seed is None:
@@ -192,6 +194,11 @@ def tune_test_model(
         tu.log_results(
             fl_name=log_name, fl_path=log_path, log_data=log_data, tune_test=True
         )
+
+    if pkl_store:
+        tmp_data = X.copy(deep=True)
+        tmp_data["y_true"] = y
+        tu.pickle_data_model(mod=mod, data=tmp_data, fl_path=log_path, fl_name=log_name)
 
     return [mod, params, features]
 
