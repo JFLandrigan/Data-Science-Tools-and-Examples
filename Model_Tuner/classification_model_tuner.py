@@ -42,7 +42,7 @@ def tune_test_model(
     tuner="random_cv",
     n_iterations=15,
     get_ft_imp=True,
-    n_jobs=6,
+    n_jobs=1,
     random_seed=None,
     binary=True,
     log=True,
