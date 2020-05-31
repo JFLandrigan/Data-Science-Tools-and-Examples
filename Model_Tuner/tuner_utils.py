@@ -19,6 +19,7 @@ from sklearn.metrics import (
     auc,
     mean_squared_error,
     mean_absolute_error,
+    r2_score,
 )
 from math import sqrt
 
@@ -47,6 +48,11 @@ def precision_recall_auc(y_true=None, pred_probabs=None):
 
 
 def init_model_metrics(metrics=[]):
+    """
+    Function to init dictionary that stores metric functions and metric scores
+    :param metrics: list of strings for metrics to store in dictionary
+    :return: dictionary that with _func _score metric pairings
+    """
     metric_dictionary = {}
 
     # Classification Metrics
@@ -90,6 +96,10 @@ def init_model_metrics(metrics=[]):
     if "mape" in metrics:
         metric_dictionary["mape_func"] = mean_absolute_percentage_error
         metric_dictionary["mape_scores"] = np.array([])
+
+    if "r2" in metrics:
+        metric_dictionary["r2_func"] = r2_score
+        metric_dictionary["r2_scores"] = np.array([])
 
     return metric_dictionary
 
@@ -189,9 +199,7 @@ def select_features(
         print("Features dropping from low importance: " + str(imp_drop) + " \n")
 
         if plot_ft_importance:
-            _ = pu.plot_ft_imp(
-                mod_type="RandomForest", mod=forest, features=ft_cols, num_top_fts=None
-            )
+            pu.plot_feature_importance(ft_df=ftImp_df, mod_type=type(forest).__name__)
 
     if "regress" in methods:
 
